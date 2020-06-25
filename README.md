@@ -6,7 +6,7 @@ By default, the serializer can be used by adding a `go:generate` directive:
 ```go
 package main
 
-//go:generate serialize -type=Foo
+//go:generate serialize -file=$GOFILE -type=Foo
 type Foo struct {
     Bar int
     Fizz uint
@@ -20,7 +20,7 @@ For that, you should create a custom serializer, and a tag on the target field.
 ```go
 package main
 
-//go:generate serialize -type=Foo -serializer=Hashing
+//go:generate serialize -file=$GOFILE -type=Foo -serializer=Hashing
 type Foo struct {
     Bar int
     Fizz uint
