@@ -4,15 +4,15 @@ import "testing"
 
 func TestNewFieldHeader(t *testing.T) {
 	_, err := NewFieldHeader(0xff)
-	if err != nil || err.Error() != "invalid field ID" {
+	if err != nil && err.Error() != "invalid field ID" {
 		t.Error("ID validation failed")
 	}
 	_, err = NewFieldHeader(0xe1)
-	if err != nil || err.Error() != "multiple size flags set" {
+	if err != nil && err.Error() != "multiple size flags set" {
 		t.Error("size validation failed")
 	}
 	_, err = NewFieldHeader(0x41)
-	if err != nil || err.Error() != "size flag set for something that is not an array" {
+	if err != nil && err.Error() != "size flag set for something that is not an array" {
 		t.Error("array flag validation failed")
 	}
 
