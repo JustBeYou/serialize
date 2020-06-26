@@ -5,11 +5,6 @@ import (
 	"errors"
 )
 
-type StructField struct {
-	name string
-	typeName string
-}
-
 /**
  * Field encoding format
  * 1st byte (upper) - flags (left to right)
