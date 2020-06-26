@@ -1,6 +1,9 @@
 package main
 
-import "errors"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 type StructField struct {
 	name string
@@ -75,7 +78,7 @@ func oneOrLess(a, b, c bool) bool {
 
 type FieldTypeId uint8;
 const (
-	BooleanID FieldTypeId = iota
+	BoolID FieldTypeId = iota
 	UintID
 	IntID
 	Uint8ID
@@ -89,3 +92,50 @@ const (
 	StringID
 	InvalidID // invalid field id
 )
+
+var serializeTemplates = map[string]string{
+	"bool": "output = output.append(BoolAsBytes(self.{{ .name }}))",
+	"string": "output = output.append(StringAsBytes(self.{{ .name }}))",
+}
+
+func BoolAsBytes(isTrue bool) []byte {
+	// isArray is used to store the boolean value
+	header, _ := FieldHeader{
+		BoolID,
+		isTrue,
+		false,
+		false,
+		false,
+	}.Serialize()
+	return header
+}
+
+// 1st byte after header -
+//		1st bit - If 0 -> 16 bit size, if 1 -> 32 bit size
+func StringAsBytes(data string) []byte {
+	header, _ := FieldHeader{
+		StringID,
+		false,
+		false,
+		false,
+		false,
+	}.Serialize()
+
+	dataAsBytes := []byte(data)
+
+	var sizeAsBytes []byte
+	if len(dataAsBytes) > 0xffff {
+		sizeAsBytes = make([]byte, 4)
+		binary.LittleEndian.PutUint32(sizeAsBytes, uint32(len(dataAsBytes)))
+		sizeAsBytes[0] |= 1<<7
+	} else {
+		sizeAsBytes = make([]byte, 2)
+		binary.LittleEndian.PutUint16(sizeAsBytes, uint16(len(dataAsBytes)))
+	}
+
+	var output []byte
+	output = append(output, header...)
+	output = append(output, sizeAsBytes...)
+	output = append(output, dataAsBytes...)
+	return output
+}
