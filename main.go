@@ -3,8 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"go/ast"
 	"os"
+	"os/exec"
+	"strings"
 )
 
 func main() {
@@ -29,7 +30,19 @@ func main() {
 	if !found {
 		panic("Type declaration not found in file")
 	}
-	fmt.Printf("Found %s\n", typeNode.(*ast.TypeSpec).Name.Name)
 	fields := parseStruct(typeNode)
-	fmt.Printf("Fields: %v\n", fields)
+
+	output := GenPackageHeaderAndImports("main") + GenSerializationHeader(*targetType)
+	for _, i := range fields {
+		output += GenFieldSerialization(i)
+	}
+	output += GenSerializationFooter()
+
+	outputFilePath := strings.Replace(*targetFile, ".go", ".ser.go", 1)
+	outputFile, _ := os.Create(outputFilePath)
+
+	outputFile.WriteString(output)
+	outputFile.Close()
+	c := exec.Command("gofmt", "-w", outputFilePath)
+	c.Output()
 }

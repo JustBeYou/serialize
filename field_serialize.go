@@ -18,8 +18,10 @@ type StructField struct {
  *		- 3rd bit - 64 bit array/string/map size?
  *		- 4th ... 7th - RESERVED
  * 		- 8th bit - if boolean and true -> 1, else 0
- * If array, 1 to 8 bytes for size (depending on flags)
+ * 1 to 8 bytes for size (depending on flags)
  * Value bytes
+ *
+ * If it is not an array/string/map/bool, then the header is omitted
  */
 type FieldHeader struct {
 	Is16BitSize bool
