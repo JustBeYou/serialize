@@ -5,38 +5,12 @@ import (
 	"testing"
 )
 
-func TestNewFieldHeader(t *testing.T) {
-	_, err := NewFieldHeader(0xe1)
-	if err != nil && err.Error() != "multiple size flags set" {
-		t.Error("size validation failed")
-	}
-}
-
-func TestFieldHeader_Serialize(t *testing.T) {
-	h := FieldHeader{
-		true,
-		false,
-		false,
-	}
-	output, err := h.Serialize()
-	if err != nil || output[0] != 0x80 {
-		t.Errorf("invalid serialized output: %x", output[0])
-	}
-}
-
 func TestBoolAsBytes(t *testing.T) {
 	if BoolAsBytes(true)[0] != 1{
 		t.Error("should be true")
 	}
 	if BoolAsBytes(false)[0] != 0{
 		t.Error("should be false")
-	}
-}
-
-func TestBoolFromBytes(t *testing.T) {
-	value, consumed := BoolFromBytes([]byte{1})
-	if value != true || consumed != 1 {
-		t.Error("bad decoding")
 	}
 }
 
@@ -68,14 +42,5 @@ func TestStringAsBytes(t *testing.T) {
 	value = StringAsBytes("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
 	if !bytes.Equal(value, expected) {
 		t.Errorf("invalid encoding: %v != %v", value, expected)
-	}
-}
-
-func TestStringFromBytes(t *testing.T) {
-	expected := "AAAA"
-	input := []byte{0x0, 0x4, 0x41, 0x41, 0x41, 0x41}
-	value, consumed, err := StringFromBytes(input)
-	if value != expected || consumed != uint64(len(input)) || err != nil{
-		t.Errorf("invalid dencoding (%d): %s != %s, %v", consumed, value, expected, err)
 	}
 }

@@ -1,4 +1,4 @@
-package interfaces
+package standard
 
 type Serializer interface {
 	Serialize() ([]byte, error)
