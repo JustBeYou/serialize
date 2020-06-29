@@ -1,4 +1,4 @@
-package main
+package code
 
 import (
 	"go/ast"
@@ -6,7 +6,7 @@ import (
 	"go/token"
 )
 
-func createFileParser(targetFile string) *ast.File {
+func CreateFileParser(targetFile string) *ast.File {
 	fileSet := token.NewFileSet()
 	rootNode, err := parser.ParseFile(fileSet, targetFile, nil, parser.ParseComments)
 	if err != nil {
@@ -15,7 +15,7 @@ func createFileParser(targetFile string) *ast.File {
 	return rootNode
 }
 
-func findTargetTypeNode(rootNode ast.Node, targetType string) (ast.Node, bool) {
+func FindTargetTypeNode(rootNode ast.Node, targetType string) (ast.Node, bool) {
 	var typeNode ast.Node
 	found := false
 	ast.Inspect(rootNode, func(n ast.Node) bool {
@@ -30,7 +30,7 @@ func findTargetTypeNode(rootNode ast.Node, targetType string) (ast.Node, bool) {
 	return typeNode, found
 }
 
-func parseStruct(typeNode ast.Node) []StructField {
+func ParseStruct(typeNode ast.Node) []StructField {
 	var fields []StructField
 	ast.Inspect(typeNode, func(x ast.Node) bool {
 		s, ok := x.(*ast.StructType)
@@ -47,4 +47,16 @@ func parseStruct(typeNode ast.Node) []StructField {
 		return false
 	})
 	return fields
+}
+
+func FindPackageName(rootNode ast.Node) string {
+	packageName := ""
+	ast.Inspect(rootNode, func(n ast.Node) bool {
+		i, ok := n.(*ast.Ident)
+		if ok && packageName == "" && i.Name != "" {
+			packageName = i.Name
+		}
+		return true
+	})
+	return packageName
 }

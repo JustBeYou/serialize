@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"serialize/code"
 	"strings"
 )
 
@@ -24,19 +25,19 @@ func main() {
 		return ;
 	}
 
-	rootNode := createFileParser(*targetFile)
-	typeNode, found := findTargetTypeNode(rootNode, *targetType)
+	rootNode := code.CreateFileParser(*targetFile)
+	typeNode, found := code.FindTargetTypeNode(rootNode, *targetType)
 
 	if !found {
 		panic("Type declaration not found in file")
 	}
-	fields := parseStruct(typeNode)
+	fields := code.ParseStruct(typeNode)
 
-	output := GenPackageHeaderAndImports("main") + GenSerializationHeader(*targetType)
+	output := code.GenPackageHeaderAndImports(code.FindPackageName(rootNode)) + code.GenSerializationHeader(*targetType)
 	for _, i := range fields {
-		output += GenFieldSerialization(i)
+		output += code.GenFieldSerialization(i)
 	}
-	output += GenSerializationFooter()
+	output += code.GenSerializationFooter()
 
 	outputFilePath := strings.Replace(*targetFile, ".go", ".ser.go", 1)
 	outputFile, _ := os.Create(outputFilePath)

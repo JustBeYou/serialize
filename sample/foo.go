@@ -4,4 +4,6 @@ package sample
 type Foo struct {
 	Bar int
 	Fizz uint
+	Buzz string
+	FizzBuzz bool
 }
