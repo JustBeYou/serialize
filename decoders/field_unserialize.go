@@ -5,8 +5,8 @@ import (
 	"serialize/standard"
 )
 
-func BoolFromBytes(data []byte) (bool, uint64) {
-	return data[0] & 1 == 1, 1
+func BoolFromBytes(data []byte) (bool, uint64, error) {
+	return data[0] & 1 == 1, 1, nil
 }
 
 func StringFromBytes(data []byte) (string, uint64, error) {

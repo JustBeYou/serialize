@@ -3,7 +3,7 @@ package decoders
 import "testing"
 
 func TestBoolFromBytes(t *testing.T) {
-	value, consumed := BoolFromBytes([]byte{1})
+	value, consumed, _ := BoolFromBytes([]byte{1})
 	if value != true || consumed != 1 {
 		t.Error("bad decoding")
 	}
