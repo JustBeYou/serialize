@@ -39,6 +39,12 @@ func main() {
 	}
 	output += code.GenSerializationFooter()
 
+	output += code.GenUnserializationHeader(*targetType)
+	for _, i := range fields {
+		output += code.GenFieldUnserialization(i)
+	}
+	output += code.GenUnserializationFooter()
+
 	outputFilePath := strings.Replace(*targetFile, ".go", ".ser.go", 1)
 	outputFile, _ := os.Create(outputFilePath)
 

@@ -1,6 +1,6 @@
 package sample
 
-//go:generate serialize $GOFILE -type=Foo
+//go:generate serialize -file=$GOFILE -type=Foo
 type Foo struct {
 	Bar int
 	Fizz uint

@@ -1,6 +1,9 @@
 package sample
 
 import (
+	"errors"
+	"fmt"
+	"serialize/decoders"
 	"serialize/encoders"
 )
 
@@ -21,5 +24,36 @@ func (self Foo) Serialize() ([]byte, error) {
 
 	bytesTemp = encoders.BoolAsBytes(self.FizzBuzz)
 	output = append(output, bytesTemp...)
+	return output, nil
+}
+func (self Foo) Unserialize(data []byte) (interface{}, error) {
+	var output Foo
+	var index uint64 = 0
+	var consumed uint64 = 0
+	var err error
+
+	output.Bar, consumed, err = decoders.IntFromBytes(data[index:])
+	if err != nil {
+		return output, errors.New(fmt.Sprintf("Could not decode at %d: %s\n", index, err.Error()))
+	}
+	index += consumed
+
+	output.Fizz, consumed, err = decoders.UintFromBytes(data[index:])
+	if err != nil {
+		return output, errors.New(fmt.Sprintf("Could not decode at %d: %s\n", index, err.Error()))
+	}
+	index += consumed
+
+	output.Buzz, consumed, err = decoders.StringFromBytes(data[index:])
+	if err != nil {
+		return output, errors.New(fmt.Sprintf("Could not decode at %d: %s\n", index, err.Error()))
+	}
+	index += consumed
+
+	output.FizzBuzz, consumed, err = decoders.BoolFromBytes(data[index:])
+	if err != nil {
+		return output, errors.New(fmt.Sprintf("Could not decode at %d: %s\n", index, err.Error()))
+	}
+	index += consumed
 	return output, nil
 }
