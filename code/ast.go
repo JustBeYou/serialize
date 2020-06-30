@@ -1,6 +1,7 @@
 package code
 
 import (
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -39,9 +40,19 @@ func ParseStruct(typeNode ast.Node) []StructField {
 		}
 
 		for _, field := range s.Fields.List {
+			asArray, isArray := field.Type.(*ast.ArrayType)
+			var typeName string
+			if isArray {
+				fmt.Printf("Array of %s's\n", asArray.Elt)
+				typeName = fmt.Sprintf("%s", asArray.Elt)
+			} else {
+				typeName = field.Type.(*ast.Ident).Name
+			}
+
 			fields = append(fields, StructField{
 				field.Names[0].Name,
-				field.Type.(*ast.Ident).Name,
+				typeName,
+				isArray,
 			})
 		}
 		return false

@@ -11,7 +11,7 @@ func BoolFromBytes(data []byte) (bool, uint64, error) {
 
 func StringFromBytes(data []byte) (string, uint64, error) {
 	var consumed uint64 = 1
-	header, err := standard.NewFieldHeader(data[0])
+	header, err := standard.FieldHeaderFromBytes(data[0])
 	if err != nil {
 		return "", 0, err
 	}

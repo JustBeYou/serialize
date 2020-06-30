@@ -8,6 +8,7 @@ import (
 type StructField struct {
 	name string
 	typeName string
+	isArray bool
 }
 
 func GenPackageHeaderAndImports(name string) string {
@@ -16,6 +17,7 @@ func GenPackageHeaderAndImports(name string) string {
 		import (
 			"serialize/encoders"
 			"serialize/decoders"
+			"serialize/standard"
 			"errors"
 			"fmt"
 		)
@@ -29,6 +31,8 @@ func GenSerializationHeader(name string) string {
 	return fmt.Sprintf(`
 		func (self %s) Serialize() ([]byte, error) {
 			var output, bytesTemp []byte
+			var tempHeader standard.FieldHeader
+			var tempLen uint64
 	`, name)
 }
 
@@ -37,6 +41,29 @@ func GenSerializationFooter() string {
 }
 
 func GenFieldSerialization(fieldInfo StructField) string {
+	if fieldInfo.isArray {
+		return fmt.Sprintf(`
+			tempLen = uint64(len(self.%s))
+			tempHeader = standard.NewArrayHeader(tempLen)
+			bytesTemp, _ = tempHeader.Serialize()
+
+			if tempHeader.Is16BitSize {
+				bytesTemp = append(bytesTemp, encoders.Uint16AsBytes(uint16(tempLen))...)
+			} else if tempHeader.Is32BitSize {
+				bytesTemp = append(bytesTemp, encoders.Uint32AsBytes(uint32(tempLen))...)
+			} else if tempHeader.Is64BitSize {
+				bytesTemp = append(bytesTemp, encoders.Uint64AsBytes(uint64(tempLen))...)
+			} else {
+				bytesTemp = append(bytesTemp, encoders.Uint8AsBytes(uint8(tempLen))...)
+			}
+
+			for _, v := range self.%s {
+				bytesTemp = append(bytesTemp, encoders.%sAsBytes(v)...)
+			}
+			output = append(output, bytesTemp...)
+		`, fieldInfo.name, fieldInfo.name, strings.Title(fieldInfo.typeName))
+	}
+
 	return fmt.Sprintf(`
 		bytesTemp = encoders.%sAsBytes(self.%s)
 		output = append(output, bytesTemp...)
@@ -50,10 +77,51 @@ func GenUnserializationHeader(name string) string {
 			var index uint64 = 0
 			var consumed uint64 = 0
 			var err error
+			var tempHeader standard.FieldHeader
+			var tempLen uint64
 	`, name, name)
 }
 
 func GenFieldUnserialization(fieldInfo StructField) string {
+	if fieldInfo.isArray {
+		return fmt.Sprintf(`
+			tempHeader, err = standard.FieldHeaderFromBytes(data[index])
+			if err != nil {
+				return output, errors.New(fmt.Sprintf("Could not decode at %%d: %%s\n", index, err.Error()))
+			}
+			index += 1
+
+			if tempHeader.Is16BitSize {
+				var tempLen2 uint16
+				tempLen2, consumed, err = decoders.Uint16FromBytes(data[index:])
+				tempLen = uint64(tempLen2)
+			} else if tempHeader.Is32BitSize {
+				var tempLen2 uint32
+				tempLen2, consumed, err = decoders.Uint32FromBytes(data[index:])
+				tempLen = uint64(tempLen2)
+			} else if tempHeader.Is64BitSize {
+				var tempLen2 uint64
+				tempLen2, consumed, err = decoders.Uint64FromBytes(data[index:])
+				tempLen = uint64(tempLen2)
+			} else {
+				var tempLen2 uint8
+				tempLen2, consumed, err = decoders.Uint8FromBytes(data[index:])
+				tempLen = uint64(tempLen2)
+			}
+			index += consumed
+
+			for i := uint64(0); i < tempLen; i++  {
+				var tempValue %s
+				tempValue, consumed, err = decoders.%sFromBytes(data[index:])
+				output.%s = append(output.%s, tempValue)
+				if err != nil {
+					return output, errors.New(fmt.Sprintf("Could not decode at %%d: %%s\n", index, err.Error()))
+				}
+				index += consumed
+			}
+		`, fieldInfo.typeName, strings.Title(fieldInfo.typeName), fieldInfo.name, fieldInfo.name)
+	}
+
 	return fmt.Sprintf(`
 		output.%s, consumed, err = decoders.%sFromBytes(data[index:])
 		if err != nil {

@@ -21,7 +21,20 @@ type FieldHeader struct {
 	Is64BitSize bool
 }
 
-func NewFieldHeader(data byte) (FieldHeader, error) {
+func NewArrayHeader(size uint64) FieldHeader {
+	header := FieldHeader{}
+	if size > 0xffffffff {
+		header.Is64BitSize = true
+	} else if size > 0xffff {
+		header.Is32BitSize = true
+	} else if size > 0xff {
+		header.Is16BitSize = true
+	}
+
+	return header
+}
+
+func FieldHeaderFromBytes(data byte) (FieldHeader, error) {
 	header := FieldHeader{}
 	header.Is16BitSize = (data>>7 & 0x1) == 0x1;
 	header.Is32BitSize = (data>>6 & 0x1) == 0x1;
