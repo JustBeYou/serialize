@@ -3,7 +3,7 @@ package standard
 import "testing"
 
 func TestNewFieldHeader(t *testing.T) {
-	_, err := NewFieldHeader(0xe1)
+	_, err := FieldHeaderFromBytes(0xe1)
 	if err != nil && err.Error() != "multiple size flags set" {
 		t.Error("size validation failed")
 	}

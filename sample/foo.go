@@ -6,4 +6,5 @@ type Foo struct {
 	Fizz uint
 	Buzz string
 	FizzBuzz bool
+	BarArray []bool
 }
