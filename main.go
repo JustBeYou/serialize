@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"os/exec"
 	"serialize/code"
@@ -51,7 +52,7 @@ func main() {
 		output += code.GenUnserializationFooter()
 	}
 
-	outputFilePath := strings.Replace(*targetFile, ".go", ".ser.go", 1)
+	outputFilePath := strings.Replace(*targetFile, ".go", fmt.Sprintf(".%s.ser.go", strings.ToLower(*targetType)), 1)
 	outputFile, _ := os.Create(outputFilePath)
 
 	outputFile.WriteString(output)

@@ -5,5 +5,5 @@ type Serializer interface {
 }
 
 type Unserializer interface {
-	Unserialize([]byte) (interface{}, error)
+	Unserialize([]byte) (interface{}, uint64, error)
 }

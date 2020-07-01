@@ -13,6 +13,7 @@ type StructField struct {
 	typeName string
 	isArray bool
 	options FieldOptions
+	isCustomType bool
 }
 
 func GenPackageHeaderAndImports(name string) string {
@@ -52,7 +53,7 @@ func GenFieldSerialization(serializerName string, fieldInfo StructField) string 
 	}
 
 	if fieldInfo.isArray {
-		return fmt.Sprintf(`
+		generated := fmt.Sprintf(`
 			tempLen = uint64(len(self.%s))
 			tempHeader = standard.NewArrayHeader(tempLen)
 			bytesTemp, _ = tempHeader.Serialize()
@@ -65,13 +66,27 @@ func GenFieldSerialization(serializerName string, fieldInfo StructField) string 
 				bytesTemp = append(bytesTemp, encoders.Uint64AsBytes(uint64(tempLen))...)
 			} else {
 				bytesTemp = append(bytesTemp, encoders.Uint8AsBytes(uint8(tempLen))...)
-			}
+			}`, fieldInfo.name)
 
+		if fieldInfo.isCustomType {
+			return "// CUSTOM []TYPE DETECTED!\n"
+		} else {
+			generated += fmt.Sprintf(`
 			for _, v := range self.%s {
 				bytesTemp = append(bytesTemp, encoders.%sAsBytes(v)...)
 			}
 			output = append(output, bytesTemp...)
-		`, fieldInfo.name, fieldInfo.name, strings.Title(fieldInfo.typeName))
+			`, fieldInfo.name, strings.Title(fieldInfo.typeName))
+		}
+
+		return generated
+	}
+
+	if fieldInfo.isCustomType {
+		return fmt.Sprintf(`
+			bytesTemp, _ = self.%s.%sSerialize()
+			output = append(output, bytesTemp...)
+		`, fieldInfo.name, strings.Title(serializerName))
 	}
 
 	return fmt.Sprintf(`
@@ -82,13 +97,14 @@ func GenFieldSerialization(serializerName string, fieldInfo StructField) string 
 
 func GenUnserializationHeader(serializerName, typeName string) string {
 	return fmt.Sprintf(`
-		func (self %s) %sUnserialize(data []byte) (interface{}, error) {
+		func (self %s) %sUnserialize(data []byte) (interface{}, uint64, error) {
 			var output %s
 			var index uint64 = 0
 			var consumed uint64 = 0
 			var err error
 			var tempHeader standard.FieldHeader
 			var tempLen uint64
+			var tempCustom interface{}
 	`, typeName, strings.Title(serializerName), typeName)
 }
 
@@ -100,10 +116,10 @@ func GenFieldUnserialization(serializerName string, fieldInfo StructField) strin
 	}
 
 	if fieldInfo.isArray {
-		return fmt.Sprintf(`
+		generated := `
 			tempHeader, err = standard.FieldHeaderFromBytes(data[index])
 			if err != nil {
-				return output, errors.New(fmt.Sprintf("Could not decode at %%d: %%s\n", index, err.Error()))
+				return output, index, errors.New(fmt.Sprintf("Could not decode"))
 			}
 			index += 1
 
@@ -125,28 +141,47 @@ func GenFieldUnserialization(serializerName string, fieldInfo StructField) strin
 				tempLen = uint64(tempLen2)
 			}
 			index += consumed
+			`
 
+		if fieldInfo.isCustomType {
+			return "// CUSTOM []TYPE DETECTED!\n"
+		} else {
+			generated += fmt.Sprintf(`
 			for i := uint64(0); i < tempLen; i++  {
 				var tempValue %s
 				tempValue, consumed, err = decoders.%sFromBytes(data[index:])
 				output.%s = append(output.%s, tempValue)
 				if err != nil {
-					return output, errors.New(fmt.Sprintf("Could not decode at %%d: %%s\n", index, err.Error()))
+					return output, index, errors.New(fmt.Sprintf("Could not decode at %%d: %%s\n", index, err.Error()))
 				}
 				index += consumed
 			}
-		`, fieldInfo.typeName, strings.Title(fieldInfo.typeName), fieldInfo.name, fieldInfo.name)
+			`, fieldInfo.typeName, strings.Title(fieldInfo.typeName), fieldInfo.name, fieldInfo.name)
+		}
+
+		return generated
+	}
+
+	if fieldInfo.isCustomType {
+		return fmt.Sprintf(`
+			tempCustom, consumed, err = %s{}.%sUnserialize(data[index:])
+			if err != nil {
+				return output, index, errors.New(fmt.Sprintf("Could not decode"))
+			}
+			output.%s = tempCustom.(%s)
+			index += consumed
+		`, fieldInfo.typeName, strings.Title(serializerName), fieldInfo.name, fieldInfo.typeName)
 	}
 
 	return fmt.Sprintf(`
 		output.%s, consumed, err = decoders.%sFromBytes(data[index:])
 		if err != nil {
-			return output, errors.New(fmt.Sprintf("Could not decode at %%d: %%s\n", index, err.Error()))
+			return output, index, errors.New(fmt.Sprintf("Could not decode"))
 		}
 		index += consumed
 	`, fieldInfo.name, strings.Title(fieldInfo.typeName))
 }
 
 func GenUnserializationFooter() string {
-	return "return output, nil }"
+	return "return output, index, nil }"
 }

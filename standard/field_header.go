@@ -71,3 +71,18 @@ func FieldHeaderValidator(header FieldHeader) error {
 func oneOrLess(a, b, c bool) bool {
 	return (((a != b) != c) && !(a && b && c)) || (!a && !b && !c)
 }
+
+var DefaultTypes = map[string]bool{
+	"bool": true,
+	"string": true,
+	"int": true,
+	"uint": true,
+	"int8": true,
+	"int16": true,
+	"int32": true,
+	"int64": true,
+	"uint8": true,
+	"uint16": true,
+	"uint32": true,
+	"uint64": true,
+}

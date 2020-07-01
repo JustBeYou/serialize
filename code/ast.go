@@ -6,6 +6,7 @@ import (
 	"go/parser"
 	"go/token"
 	"reflect"
+	"serialize/standard"
 )
 
 func CreateFileParser(targetFile string) *ast.File {
@@ -63,11 +64,17 @@ func ParseStruct(typeNode ast.Node, serializersList []string) []StructField {
 				}
 			}
 
+			isCustomType := false
+			if _, ok := standard.DefaultTypes[typeName]; !ok {
+				isCustomType = true
+			}
+
 			fields = append(fields, StructField{
 				field.Names[0].Name,
 				typeName,
 				isArray,
 				tagOptions,
+				isCustomType,
 			})
 		}
 		return false
