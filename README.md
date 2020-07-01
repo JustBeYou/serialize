@@ -20,12 +20,12 @@ For that, you should create a custom serializer, and a tag on the target field.
 ```go
 package main
 
-//go:generate serialize -file=$GOFILE -type=Foo -serializer=Hashing
+//go:generate serialize -file=$GOFILE -type=Foo -serializer=hashing
 type Foo struct {
-    Bar int
-    Fizz uint
-    Hash string `serialize:"Hashing" Hashing:"ignore"`
-} 
+	Bar int
+	Fizz uint
+	Hash string `hashing:"ignore"`
+}
 ```
 For the code above, two interfaces will be generated, with the following naming convetion:
 ```

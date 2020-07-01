@@ -5,10 +5,14 @@ import (
 	"strings"
 )
 
+type FieldOptions map[string]SerializerOptions
+type SerializerOptions map[string]bool
+
 type StructField struct {
 	name string
 	typeName string
 	isArray bool
+	options FieldOptions
 }
 
 func GenPackageHeaderAndImports(name string) string {
@@ -27,20 +31,26 @@ func GenPackageHeaderAndImports(name string) string {
 	`, name)
 }
 
-func GenSerializationHeader(name string) string {
+func GenSerializationHeader(serializerName, typeName string) string {
 	return fmt.Sprintf(`
-		func (self %s) Serialize() ([]byte, error) {
+		func (self %s)%sSerialize() ([]byte, error) {
 			var output, bytesTemp []byte
 			var tempHeader standard.FieldHeader
 			var tempLen uint64
-	`, name)
+	`, typeName, strings.Title(serializerName))
 }
 
 func GenSerializationFooter() string {
 	return "return output, nil }"
 }
 
-func GenFieldSerialization(fieldInfo StructField) string {
+func GenFieldSerialization(serializerName string, fieldInfo StructField) string {
+	if serializerOptions, ok := fieldInfo.options[serializerName]; ok {
+		if _, ok := serializerOptions["ignore"]; ok {
+			return ""
+		}
+	}
+
 	if fieldInfo.isArray {
 		return fmt.Sprintf(`
 			tempLen = uint64(len(self.%s))
@@ -70,19 +80,25 @@ func GenFieldSerialization(fieldInfo StructField) string {
 	`, strings.Title(fieldInfo.typeName), fieldInfo.name)
 }
 
-func GenUnserializationHeader(name string) string {
+func GenUnserializationHeader(serializerName, typeName string) string {
 	return fmt.Sprintf(`
-		func (self %s) Unserialize(data []byte) (interface{}, error) {
+		func (self %s) %sUnserialize(data []byte) (interface{}, error) {
 			var output %s
 			var index uint64 = 0
 			var consumed uint64 = 0
 			var err error
 			var tempHeader standard.FieldHeader
 			var tempLen uint64
-	`, name, name)
+	`, typeName, strings.Title(serializerName), typeName)
 }
 
-func GenFieldUnserialization(fieldInfo StructField) string {
+func GenFieldUnserialization(serializerName string, fieldInfo StructField) string {
+	if serializerOptions, ok := fieldInfo.options[serializerName]; ok {
+		if _, ok := serializerOptions["ignore"]; ok {
+			return ""
+		}
+	}
+
 	if fieldInfo.isArray {
 		return fmt.Sprintf(`
 			tempHeader, err = standard.FieldHeaderFromBytes(data[index])

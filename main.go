@@ -2,12 +2,13 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
 	"os/exec"
 	"serialize/code"
 	"strings"
 )
+
+const defaultSerializer = ""
 
 func main() {
 	targetFile := flag.String("file", "", "Target file")
@@ -20,10 +21,11 @@ func main() {
 		return ;
 	}
 
+	var serializersList []string
 	if *serializer != "" {
-		fmt.Fprintf(os.Stderr, "-serializer not implemented yet\n")
-		return ;
+		serializersList = strings.Split(*serializer, ",")
 	}
+	serializersList = append(serializersList, defaultSerializer)
 
 	rootNode := code.CreateFileParser(*targetFile)
 	typeNode, found := code.FindTargetTypeNode(rootNode, *targetType)
@@ -31,19 +33,23 @@ func main() {
 	if !found {
 		panic("Type declaration not found in file")
 	}
-	fields := code.ParseStruct(typeNode)
+	fields := code.ParseStruct(typeNode, serializersList)
 
-	output := code.GenPackageHeaderAndImports(code.FindPackageName(rootNode)) + code.GenSerializationHeader(*targetType)
-	for _, i := range fields {
-		output += code.GenFieldSerialization(i)
-	}
-	output += code.GenSerializationFooter()
+	output := code.GenPackageHeaderAndImports(code.FindPackageName(rootNode))
 
-	output += code.GenUnserializationHeader(*targetType)
-	for _, i := range fields {
-		output += code.GenFieldUnserialization(i)
+	for _, serializerName := range serializersList {
+		output += code.GenSerializationHeader(serializerName, *targetType)
+		for _, i := range fields {
+			output += code.GenFieldSerialization(serializerName, i)
+		}
+		output += code.GenSerializationFooter()
+
+		output += code.GenUnserializationHeader(serializerName, *targetType)
+		for _, i := range fields {
+			output += code.GenFieldUnserialization(serializerName, i)
+		}
+		output += code.GenUnserializationFooter()
 	}
-	output += code.GenUnserializationFooter()
 
 	outputFilePath := strings.Replace(*targetFile, ".go", ".ser.go", 1)
 	outputFile, _ := os.Create(outputFilePath)

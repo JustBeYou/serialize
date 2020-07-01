@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"reflect"
 )
 
 func CreateFileParser(targetFile string) *ast.File {
@@ -31,7 +32,7 @@ func FindTargetTypeNode(rootNode ast.Node, targetType string) (ast.Node, bool) {
 	return typeNode, found
 }
 
-func ParseStruct(typeNode ast.Node) []StructField {
+func ParseStruct(typeNode ast.Node, serializersList []string) []StructField {
 	var fields []StructField
 	ast.Inspect(typeNode, func(x ast.Node) bool {
 		s, ok := x.(*ast.StructType)
@@ -43,16 +44,30 @@ func ParseStruct(typeNode ast.Node) []StructField {
 			asArray, isArray := field.Type.(*ast.ArrayType)
 			var typeName string
 			if isArray {
-				fmt.Printf("Array of %s's\n", asArray.Elt)
 				typeName = fmt.Sprintf("%s", asArray.Elt)
 			} else {
 				typeName = field.Type.(*ast.Ident).Name
+			}
+
+			tagOptions := make(FieldOptions)
+			if field.Tag != nil {
+				tag := reflect.StructTag(field.Tag.Value[1:len(field.Tag.Value)-1])
+				for _, serializerName := range serializersList {
+					value, ok := tag.Lookup(serializerName)
+					if ok {
+						if tagOptions[serializerName] == nil {
+							tagOptions[serializerName] = make(SerializerOptions)
+						}
+						tagOptions[serializerName][value] = true
+					}
+				}
 			}
 
 			fields = append(fields, StructField{
 				field.Names[0].Name,
 				typeName,
 				isArray,
+				tagOptions,
 			})
 		}
 		return false
