@@ -36,7 +36,7 @@ func main() {
 	}
 	fields := code.ParseStruct(typeNode, serializersList)
 
-	output := code.GenPackageHeaderAndImports(code.FindPackageName(rootNode))
+	output := code.GenPackageHeaderAndImports(code.FindPackageName(rootNode), *targetType)
 
 	for _, serializerName := range serializersList {
 		output += code.GenSerializationHeader(serializerName, *targetType)
