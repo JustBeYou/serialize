@@ -9,11 +9,20 @@ type Foo struct {
 	BarArray []bool
 	Hash string `hashing:"ignore"`
 	Custom Bar
+	CustomInterface interface{}
 }
 
 //go:generate serialize -file=$GOFILE -type=Bar -serializer=hashing
 type Bar struct {
 	Value int
+}
+
+type OnlyBar interface {
+	OnlyBar() error
+}
+
+func (b Bar) OnlyBar() error {
+	return nil
 }
 
 type HashingSerializer interface {
