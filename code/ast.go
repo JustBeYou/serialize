@@ -43,9 +43,13 @@ func ParseStruct(typeNode ast.Node, serializersList []string) []StructField {
 
 		for _, field := range s.Fields.List {
 			asArray, isArray := field.Type.(*ast.ArrayType)
+			_, isInterface := field.Type.(*ast.InterfaceType)
+
 			var typeName string
 			if isArray {
 				typeName = fmt.Sprintf("%s", asArray.Elt)
+			} else if isInterface {
+				typeName = "interface";
 			} else {
 				typeName = field.Type.(*ast.Ident).Name
 			}
