@@ -14,6 +14,7 @@ func TestFieldHeader_Serialize(t *testing.T) {
 		true,
 		false,
 		false,
+		false,
 	}
 	output, err := h.Serialize()
 	if err != nil || output[0] != 0x80 {

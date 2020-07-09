@@ -8,7 +8,8 @@ import "errors"
  *		- 1st bit - 16 bit array/string/map size?
  *		- 2nd bit - 32 bit array/string/map size?
  *		- 3rd bit - 64 bit array/string/map size?
- *		- 4th ... 7th - RESERVED
+ *		- 4th bit - 16 bit dynamic type identifier?
+ *      - 5th .. 8th bit - RESERVED FOR FUTURE USE
  * 		- 8th bit - if boolean and true -> 1, else 0
  * 1 to 8 bytes for size (depending on flags)
  * Value bytes
@@ -19,6 +20,7 @@ type FieldHeader struct {
 	Is16BitSize bool
 	Is32BitSize bool
 	Is64BitSize bool
+	Is16BitIdentifier bool
 }
 
 func NewArrayHeader(size uint64) FieldHeader {
@@ -34,11 +36,21 @@ func NewArrayHeader(size uint64) FieldHeader {
 	return header
 }
 
+func NewIdentifierHeader(identifier uint16) FieldHeader {
+	header := FieldHeader{}
+	if identifier > 0xff {
+		header.Is16BitIdentifier = true
+	}
+
+	return header
+}
+
 func FieldHeaderFromBytes(data byte) (FieldHeader, error) {
 	header := FieldHeader{}
 	header.Is16BitSize = (data>>7 & 0x1) == 0x1;
 	header.Is32BitSize = (data>>6 & 0x1) == 0x1;
 	header.Is64BitSize = (data>>5 & 0x1) == 0x1;
+	header.Is16BitIdentifier = (data>>4 & 0x1) == 0x1;
 
 	return header, FieldHeaderValidator(header)
 }
@@ -51,6 +63,10 @@ func (h FieldHeader) Serialize() ([]byte, error) {
 		output |= 1 << 6
 	} else if h.Is64BitSize {
 		output |= 1 << 5
+	}
+
+	if h.Is16BitIdentifier {
+		output |= 1 << 4
 	}
 
 	return []byte{output}, FieldHeaderValidator(h)

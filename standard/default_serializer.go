@@ -7,3 +7,7 @@ type Serializer interface {
 type Unserializer interface {
 	Unserialize([]byte) (interface{}, uint64, error)
 }
+
+type Namer interface {
+	Name() string
+}
