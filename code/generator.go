@@ -20,9 +20,9 @@ func GenPackageHeaderAndImports(name string) string {
 	return fmt.Sprintf(`
 		package %s
 		import (
-			"serialize/encoders"
-			"serialize/decoders"
-			"serialize/standard"
+			"github.com/JustBeYou/serialize/encoders"
+			"github.com/JustBeYou/serialize/decoders"
+			"github.com/JustBeYou/serialize/standard"
 			"errors"
 			"fmt"
 		)
