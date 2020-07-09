@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/JustBeYou/serialize/code"
 	"os"
 	"os/exec"
-	"serialize/code"
 	"strings"
 )
 

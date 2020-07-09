@@ -2,7 +2,7 @@ package encoders
 
 import (
 	"encoding/binary"
-	"serialize/standard"
+	"github.com/JustBeYou/serialize/standard"
 )
 
 func BoolAsBytes(isTrue bool) []byte {

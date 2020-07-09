@@ -2,11 +2,11 @@ package code
 
 import (
 	"fmt"
+	"github.com/JustBeYou/serialize/standard"
 	"go/ast"
 	"go/parser"
 	"go/token"
 	"reflect"
-	"serialize/standard"
 )
 
 func CreateFileParser(targetFile string) *ast.File {

@@ -2,7 +2,7 @@ package decoders
 
 import (
 	"encoding/binary"
-	"serialize/standard"
+	"github.com/JustBeYou/serialize/standard"
 )
 
 func BoolFromBytes(data []byte) (bool, uint64, error) {
