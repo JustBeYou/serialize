@@ -21,5 +21,5 @@ type HashingSerializer interface {
 }
 
 type HashingUnserializer interface {
-	HashingUnserialize([]byte) (interface{}, error)
+	HashingUnserialize([]byte) (interface{}, uint64, error)
 }
