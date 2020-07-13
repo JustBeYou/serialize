@@ -1,39 +1,96 @@
 Serialize
 ===
-`serialize` should be used to easily define serializable formats for your data structures.
+`serialize` should be used to easily define serializable structs for your already existing data structures, 
+everything in native Go.
 
-By default, the serializer can be used by adding a `go:generate` directive:
+**Table of contents**
+1. [Motivation](#motivation)
+2. [Features](#features)
+3. [Example](#example)
+4. [To do's](#todos)
+5. [Contributing & feedback](#contributing)
+
+<a name="motivation"/>
+### Motivation
+1. Using Protobuf, FlatBuffers, MessagePack or other related tools is hard to set up and 
+implies using a separate domain specific language (DSL)
+2. Using JSON or XML is not storage efficient
+3. Most of the existing solutions do not support Go polymorphism (using 
+`interface{}`)
+4. There is little flexibility when it comes to treating different fields
+in a different manner (for example, when serializing for hashing you would
+like to exclude the hash field itself)
+5. The standard way of serializing structures in Go is `gob`, but it is 
+unintuitive to use and not suitable for processes like hashing (the output
+is very environment dependent)
+
+<a name="features"/>
+### Features
+1. Serialize primitive types, user defined structures and arrays
+2. Serialize polymorphic fields (ie. `interface{}`)
+3. Options for each struct field
+4. Multiple *serializers* interfaces with different options
+5. Runtime information kept only about `interface{}` fields, structure schema is kept directly in code
+
+<a name="example"/>
+### Example
+This is an example illustrating all features of `serialize`.
+
 ```go
-package main
-
-//go:generate serialize -file=$GOFILE -type=Foo
-type Foo struct {
-    Bar int
-    Fizz uint
-} 
-``` 
-In this example, for structure `Foo` will be generated two methods `Serialize()` and `Unserialize()`.
-
-In some cases, you would like to have multiple ways of serializing your data structures, for example when you have a structure
-containing its own hash, you would like to ignore this field when serializing for hash calculation.
-For that, you should create a custom serializer, and a tag on the target field.
-```go
-package main
-
 //go:generate serialize -file=$GOFILE -type=Foo -serializer=hashing
 type Foo struct {
-	Bar int
-	Fizz uint
+	Value int
 	Hash string `hashing:"ignore"`
+	Custom Bar
+	Poly interface{}
+}
+
+//go:generate serialize -file=$GOFILE -type=Bar -serializer=hashing
+type Bar struct {
+	Value int
+}
+
+//go:generate serialize -file=$GOFILE -table=true
+var TypeIdTable = map[string]uint16{
+	"Foo": 1,
+	"Bar": 2,
+}
+
+func example() {
+	foo := Foo{0, "this will be the hash", Bar{0}, Bar{1},
+	}
+
+	// Default serializer
+	output, _ := foo.Serialize()
+	unserializedData, _, err := Foo{}.Unserialize(output)
+	newFoo := unserializedData.(Foo)
+
+	// Custom serializer that ignores the Hash field
+	output, _ := foo.HashingSerialize()
+	unserializedData, _, err := Foo{}.HashingUnserialize(output)
+	newFoo := unserializedData.(Foo)
+}
+
+// Interfaces for our custom serializer
+type HashingSerializer interface {
+	HashingSerialize() ([]byte, error)
+}
+
+type HashingUnserializer interface {
+	HashingUnserialize([]byte) (interface{}, uint64, error)
 }
 ```
-For the code above, two interfaces will be generated, with the following naming convetion:
-```
-// generic
-interface <serializer>Serializer - method <serializer>Serialize()
-interface <serializer>Unserializer - method <serializer>Unserialize()
 
-// for our example
-interface HashingSerializer - method HashingSerialize()
-interface HashingUnserializer - method HashingUnserialize()
-```
+<a name="todos"/>
+### To do's
+1. Support `map`
+2. Support arrays of `interface{}`
+3. Benchmarks for time/memory
+4. Better flow for polymorphism handling
+
+<a name="contributing"/>
+### Contributing & feedback
+If you find this library useful and you would like to share some thoughts or help developing it, drop me an email at
+mihailferaru2000@gmail.com 
+
+And don't forget to STAR it! :star2:
