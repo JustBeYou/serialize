@@ -40,7 +40,7 @@ This is an example illustrating all features of `serialize`.
 //go:generate serialize -file=$GOFILE -type=Foo -serializer=hashing
 type Foo struct {
 	Value int
-	Hash string `hashing:"ignore"`
+	Hash string `hashing:"ignore"` // This means that the "HashingSerializer" will ignore this field
 	Custom Bar
 	Poly interface{}
 }
