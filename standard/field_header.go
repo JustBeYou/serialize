@@ -2,6 +2,9 @@ package standard
 
 import "errors"
 
+// TODO: support maps
+// TODO: support array of interface{}
+
 /**
  * Field encoding format
  * 1st byte (upper) - flags (left to right)
