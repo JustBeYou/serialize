@@ -50,6 +50,7 @@ type Bar struct {
 	Value int
 }
 
+// This table declaration is needed only if you use interface{} fields in your structs
 //go:generate serialize -file=$GOFILE -table=true
 var TypeIdTable = map[string]uint16{
 	"Foo": 1,
