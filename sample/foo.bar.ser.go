@@ -3,6 +3,7 @@ package sample
 import (
 	"errors"
 	"fmt"
+
 	"github.com/JustBeYou/serialize/decoders"
 	"github.com/JustBeYou/serialize/encoders"
 )

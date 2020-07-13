@@ -5,6 +5,7 @@ import (
 	"testing"
 )
 
+// TODO: clean up tests code
 func TestFoo(t *testing.T) {
 	foo := Foo{
 		-10,

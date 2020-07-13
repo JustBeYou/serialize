@@ -33,6 +33,22 @@ func FindTargetTypeNode(rootNode ast.Node, targetType string) (ast.Node, bool) {
 	return typeNode, found
 }
 
+func FindTypeTableNode(rootNode ast.Node) (*ast.ValueSpec, bool) {
+	var tableNode *ast.ValueSpec
+	found := false
+	ast.Inspect(rootNode, func(n ast.Node) bool {
+		t, ok := n.(*ast.ValueSpec)
+		if ok && t.Names[0].Name == "TypeIdTable" {
+			tableNode = t
+			found = true
+			return false
+		}
+
+		return true
+	})
+	return tableNode, found
+}
+
 func ParseStruct(typeNode ast.Node, serializersList []string) []StructField {
 	var fields []StructField
 	ast.Inspect(typeNode, func(x ast.Node) bool {

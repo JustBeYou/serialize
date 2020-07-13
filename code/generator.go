@@ -281,3 +281,25 @@ func GenFieldUnserialization(serializerName string, fieldInfo StructField) strin
 func GenUnserializationFooter() string {
 	return "return output, index, nil }"
 }
+
+func GenTypeTable(types []string) string {
+	output := `
+		var IdTypeTable map[uint16]func([]byte) (interface{}, uint64, error)
+		func init() {
+			IdTypeTable = map[uint16]func([]byte) (interface{}, uint64, error) {
+	`
+
+	for index, typeName := range types {
+		output += fmt.Sprintf(`
+			%d: func (data []byte) (interface{}, uint64, error) {
+				return %s{}.Unserialize(data)
+			},
+		`, index + 1, typeName)
+	}
+
+	output += `
+			}
+		}
+	`
+	return output
+}

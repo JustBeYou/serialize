@@ -3,6 +3,7 @@ package sample
 import (
 	"errors"
 	"fmt"
+
 	"github.com/JustBeYou/serialize/decoders"
 	"github.com/JustBeYou/serialize/encoders"
 	"github.com/JustBeYou/serialize/standard"
@@ -17,6 +18,7 @@ func (self Foo) Name() string {
 
 func (self Foo) HashingSerialize() ([]byte, error) {
 	var output, bytesTemp []byte
+
 	var tempHeader standard.FieldHeader
 	var tempLen uint64
 
@@ -72,8 +74,10 @@ func (self Foo) HashingUnserialize(data []byte) (interface{}, uint64, error) {
 	var index uint64 = 0
 	var consumed uint64 = 0
 	var err error
+
 	var tempHeader standard.FieldHeader
 	var tempLen uint64
+
 	var tempCustom interface{}
 	var tempIdentifier uint16
 
@@ -168,6 +172,7 @@ func (self Foo) HashingUnserialize(data []byte) (interface{}, uint64, error) {
 }
 func (self Foo) Serialize() ([]byte, error) {
 	var output, bytesTemp []byte
+
 	var tempHeader standard.FieldHeader
 	var tempLen uint64
 
@@ -226,8 +231,10 @@ func (self Foo) Unserialize(data []byte) (interface{}, uint64, error) {
 	var index uint64 = 0
 	var consumed uint64 = 0
 	var err error
+
 	var tempHeader standard.FieldHeader
 	var tempLen uint64
+
 	var tempCustom interface{}
 	var tempIdentifier uint16
 

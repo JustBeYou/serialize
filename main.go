@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/JustBeYou/serialize/code"
+	"go/ast"
 	"os"
 	"os/exec"
 	"strings"
@@ -31,8 +32,8 @@ func main() {
 		serializersList = append(serializersList, defaultSerializer)
 		generateStructSerializers(serializersList, *targetFile, *targetType)
 	} else if *targetTable {
-		fmt.Println("Type table generation is not implemented yet")
 		// TODO: implement generateTypeTable(*targetFile)
+		generateTypeTable(*targetFile)
 		return
 	} else {
 		flag.Usage()
@@ -44,13 +45,23 @@ func generateTypeTable(targetFile string) {
 	rootNode := code.CreateFileParser(targetFile)
 	output := code.GenPackageHeaderAndImports(code.FindPackageName(rootNode), "")
 
+	tableNode, found := code.FindTypeTableNode(rootNode)
+	if !found {
+		panic("Type table not found in file")
+	}
+
+	values := tableNode.Values[0].(*ast.CompositeLit)
+	var typeTable []string
+	for _, v := range values.Elts {
+		key := v.(*ast.KeyValueExpr).Key.(*ast.BasicLit).Value
+		typeTable = append(typeTable, key[1:len(key)-1])
+	}
+
+	output += code.GenTypeTable(typeTable)
+
 	outputFilePath := strings.Replace(targetFile, ".go", ".type.ser.go", 1)
 	outputFile, _ := os.Create(outputFilePath)
-
-	outputFile.WriteString(output)
-	outputFile.Close()
-	c := exec.Command("gofmt", "-w", outputFilePath)
-	c.Output()
+	writeAndFormatFile(outputFile, outputFilePath, output)
 }
 
 func generateStructSerializers(serializersList []string, targetFile, targetType string) {
@@ -86,13 +97,21 @@ func generateStructSerializers(serializersList []string, targetFile, targetType 
 		}
 		tempOutput = code.GenUnserializationHeader(serializerName, targetType, capabilities) + tempOutput
 		tempOutput += code.GenUnserializationFooter()
+
+		output += tempOutput
 	}
 
 	outputFilePath := strings.Replace(targetFile, ".go", fmt.Sprintf(".%s.ser.go", strings.ToLower(targetType)), 1)
 	outputFile, _ := os.Create(outputFilePath)
+	writeAndFormatFile(outputFile, outputFilePath, output)
+}
 
-	outputFile.WriteString(output)
-	outputFile.Close()
+func writeAndFormatFile(outputFile *os.File, outputFilePath, output string) {
+	_, _ = outputFile.WriteString(output)
+	_ = outputFile.Close()
 	c := exec.Command("gofmt", "-w", outputFilePath)
-	c.Output()
+	_, _ = c.Output()
+
+	c = exec.Command("goimports", "-w", outputFilePath)
+	_, _ = c.Output()
 }
