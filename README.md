@@ -88,7 +88,7 @@ type HashingUnserializer interface {
 3. Benchmarks for time/memory
 4. Better flow for polymorphism handling
 
-<a name="contributing"/>
+<a name="contributing"></a>
 ### Contributing & feedback
 If you find this library useful and you would like to share some thoughts or help developing it, drop me an email at
 mihailferaru2000@gmail.com 
