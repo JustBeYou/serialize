@@ -10,7 +10,7 @@ everything in native Go.
 4. [To do's](#todos)
 5. [Contributing & feedback](#contributing)
 
-<a name="motivation"/>
+<a name="motivation"></a>
 ### Motivation
 1. Using Protobuf, FlatBuffers, MessagePack or other related tools is hard to set up and 
 implies using a separate domain specific language (DSL)
@@ -24,7 +24,7 @@ like to exclude the hash field itself)
 unintuitive to use and not suitable for processes like hashing (the output
 is very environment dependent)
 
-<a name="features"/>
+<a name="features"></a>
 ### Features
 1. Serialize primitive types, user defined structures and arrays
 2. Serialize polymorphic fields (ie. `interface{}`)
@@ -32,7 +32,7 @@ is very environment dependent)
 4. Multiple *serializers* interfaces with different options
 5. Runtime information kept only about `interface{}` fields, structure schema is kept directly in code
 
-<a name="example"/>
+<a name="example"></a>
 ### Example
 This is an example illustrating all features of `serialize`.
 
@@ -81,7 +81,7 @@ type HashingUnserializer interface {
 }
 ```
 
-<a name="todos"/>
+<a name="todos"></a>
 ### To do's
 1. Support `map`
 2. Support arrays of `interface{}`
