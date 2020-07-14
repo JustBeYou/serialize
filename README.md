@@ -34,7 +34,7 @@ is very environment dependent)
 
 <a name="example"></a>
 ### Example
-This is an example illustrating all features of `serialize`.
+This is a short example of `serialize`'s main features.
 
 ```go
 //go:generate serialize -file=$GOFILE -type=Foo -serializer=hashing
