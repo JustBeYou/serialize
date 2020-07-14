@@ -20,6 +20,7 @@ func (self Foo) HashingSerialize() ([]byte, error) {
 	var output, bytesTemp []byte
 
 	var tempHeader standard.FieldHeader
+
 	var tempLen uint64
 
 	bytesTemp = encoders.IntAsBytes(self.Bar)
@@ -76,6 +77,7 @@ func (self Foo) HashingUnserialize(data []byte) (interface{}, uint64, error) {
 	var err error
 
 	var tempHeader standard.FieldHeader
+
 	var tempLen uint64
 
 	var tempCustom interface{}
@@ -174,6 +176,7 @@ func (self Foo) Serialize() ([]byte, error) {
 	var output, bytesTemp []byte
 
 	var tempHeader standard.FieldHeader
+
 	var tempLen uint64
 
 	bytesTemp = encoders.IntAsBytes(self.Bar)
@@ -233,6 +236,7 @@ func (self Foo) Unserialize(data []byte) (interface{}, uint64, error) {
 	var err error
 
 	var tempHeader standard.FieldHeader
+
 	var tempLen uint64
 
 	var tempCustom interface{}

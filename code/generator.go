@@ -56,9 +56,14 @@ func GenSerializationHeader(serializerName, typeName string, capabilities UsedCa
 			var output, bytesTemp []byte
 	`, typeName, strings.Title(serializerName))
 
-	if capabilities.ArraySerialize {
+	if capabilities.ArraySerialize || capabilities.CustomTypeSerialize || capabilities.InterfaceSerialize {
 		header += `
 			var tempHeader standard.FieldHeader
+		`
+	}
+
+	if capabilities.ArraySerialize {
+		header += `
 			var tempLen uint64
 		`
 	}
@@ -154,9 +159,14 @@ func GenUnserializationHeader(serializerName, typeName string, capabilities Used
 			var err error
 	`, typeName, strings.Title(serializerName), typeName)
 
-	if capabilities.ArraySerialize {
+	if capabilities.ArraySerialize || capabilities.CustomTypeSerialize || capabilities.InterfaceSerialize {
 		header += `
 			var tempHeader standard.FieldHeader
+		`
+	}
+
+	if capabilities.ArraySerialize {
+		header += `
 			var tempLen uint64
 		`
 	}
