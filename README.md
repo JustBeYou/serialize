@@ -37,6 +37,10 @@ is very environment dependent)
 This is a short example of `serialize`'s main features.
 
 ```go
+package main
+
+import "fmt"
+
 //go:generate serialize -file=$GOFILE -type=Foo -serializer=hashing
 type Foo struct {
 	Value int
@@ -57,19 +61,20 @@ var TypeIdTable = map[string]uint16{
 	"Bar": 2,
 }
 
-func example() {
-	foo := Foo{0, "this will be the hash", Bar{0}, Bar{1},
-	}
+func main() {
+	foo := Foo{0, "this will be the hash", Bar{0}, Bar{1}}
 
 	// Default serializer
-	output, err := foo.Serialize()
-	unserializedData, consumedBytes, err := Foo{}.Unserialize(output)
+	output, _ := foo.Serialize()
+	unserializedData, consumedBytes, _ := Foo{}.Unserialize(output)
 	newFoo := unserializedData.(Foo)
+	fmt.Printf("%v -> %v -> %v (%d bytes)\n", foo, output, newFoo, consumedBytes)
 
 	// Custom serializer that ignores the Hash field
-	output, err := foo.HashingSerialize()
-	unserializedData, ConsumedBytes, err := Foo{}.HashingUnserialize(output)
-	newFoo := unserializedData.(Foo)
+	output, _ = foo.HashingSerialize()
+	unserializedData, consumedBytes, _ = Foo{}.HashingUnserialize(output)
+	newFoo = unserializedData.(Foo)
+	fmt.Printf("%v -> %v -> %v (%d bytes)\n", foo, output, newFoo, consumedBytes)
 }
 
 // Interfaces for our custom serializer
