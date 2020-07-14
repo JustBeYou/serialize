@@ -62,13 +62,13 @@ func example() {
 	}
 
 	// Default serializer
-	output, _ := foo.Serialize()
-	unserializedData, _, err := Foo{}.Unserialize(output)
+	output, err := foo.Serialize()
+	unserializedData, consumedBytes, err := Foo{}.Unserialize(output)
 	newFoo := unserializedData.(Foo)
 
 	// Custom serializer that ignores the Hash field
-	output, _ := foo.HashingSerialize()
-	unserializedData, _, err := Foo{}.HashingUnserialize(output)
+	output, err := foo.HashingSerialize()
+	unserializedData, ConsumedBytes, err := Foo{}.HashingUnserialize(output)
 	newFoo := unserializedData.(Foo)
 }
 
