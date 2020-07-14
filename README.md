@@ -12,7 +12,7 @@ everything in native Go.
 
 <a name="motivation"></a>
 ### Motivation
-1. Using Protobuf, FlatBuffers, MessagePack or other related tools are hard to set up or 
+1. Using Protobuf, FlatBuffers or other related tools are hard to set up or 
 imply using a separate domain specific language (DSL)
 2. Using JSON or XML is not storage efficient
 3. Most of the existing solutions do not support Go polymorphism (using 
